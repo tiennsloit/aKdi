@@ -3,6 +3,7 @@ import uuid
 from datetime import datetime
 
 import torch
+import uvicorn
 from fastapi import FastAPI, HTTPException
 from pydantic import BaseModel
 from audiocraft.models import MusicGen
@@ -29,7 +30,9 @@ if torch.cuda.is_available():
     print(f"GPU: {torch.cuda.get_device_name(0)}")
 
 model = MusicGen.get_pretrained(MODEL_NAME)
-model.device = "cuda"
+# get_pretrained() already places the model on the right device
+# (CUDA when available, CPU otherwise) — do not force "cuda" here.
+print(f"Model device: {model.device}")
 
 print("MusicGen loaded successfully.")
 
@@ -120,3 +123,9 @@ def generate(request: GenerateRequest):
             status_code=500,
             detail=str(e)
         )
+
+
+if __name__ == "__main__":
+    # Start the API server so the endpoints are actually reachable,
+    # e.g. curl http://localhost:8000/
+    uvicorn.run(app, host="0.0.0.0", port=8000)
