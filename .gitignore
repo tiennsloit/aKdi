@@ -1,0 +1,4 @@
+*.wav
+*.zip
+node_modules
+.venv
